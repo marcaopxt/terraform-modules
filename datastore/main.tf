@@ -6,6 +6,11 @@ resource "kubernetes_namespace" "postgresql" {
   }
 }
 
+data "template_file" "postgresql_release_template" {
+  template = file("${path.module}/templates/postgresql-values.tpl.yaml")
+  vars     = var.postgresql_release_config
+}
+
 resource "helm_release" "postgresql" {
   name          = "postgresql"
   namespace     = "postgresql" 
@@ -15,12 +20,12 @@ resource "helm_release" "postgresql" {
   reuse_values  = false
   recreate_pods = true
   force_update  = true
+  values        = [ data.template_file.postgresql_release_template.rendered ]
+}
 
-  values        = [templatefile("templates/postgresql-values.tpl.yaml", {
-    postgres_username       = "postgres"
-    postgres_password       = "password"
-  })]
-
+data "template_file" "pgadmin_release_template" {
+  template = file("${path.module}/templates/pgadmin-values.tpl.yaml")
+  vars     = var.pgadmin_release_config
 }
 
 resource "helm_release" "pgadmin" {
@@ -33,9 +38,7 @@ resource "helm_release" "pgadmin" {
   recreate_pods = true
   force_update  = true
 
-  values        = [templatefile("templates/pgadmin-values.tpl.yaml", {
-    postgres_host = "postgresql.postgresql.svc.cluster.local",
-  })]
+  values        = [ data.template_file.pgadmin_release_template.rendered ]
   
   depends_on     = [ helm_release.postgresql ]
 
