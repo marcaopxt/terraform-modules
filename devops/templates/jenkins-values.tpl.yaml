@@ -670,9 +670,9 @@ agent:
   imagePullSecretName:
   componentName: "jenkins-agent"
   websocket: false
-  privileged: false
-  runAsUser:
-  runAsGroup:
+  privileged: true
+  runAsUser: root
+  runAsGroup: root
   resources:
     requests:
       cpu: "512m"
@@ -826,10 +826,10 @@ agent:
             resourceLimitCpu: "500m"
             resourceLimitMemory: "512Mi"
         envVars:
-          secretEnvVar: 
-            key: GITHUB_SSH_PRIVATE_KEY
-            secretName: jenkins-keys 
-            secretKey: GITHUB_SSH_PRIVATE_KEY 
+          - secretEnvVar: 
+              key: GITHUB_SSH_PRIVATE_KEY
+              secretName: jenkins-keys 
+              secretKey: GITHUB_SSH_PRIVATE_KEY 
 
     docker: |-
       - name: docker
