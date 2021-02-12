@@ -858,7 +858,7 @@ agent:
             command: "/bin/sh -c"
             args: "cat"
             ttyEnabled: true
-            privileged: false
+            privileged: true
             resourceRequestCpu: "200m"
             resourceRequestMemory: "256Mi"
             resourceLimitCpu: "500m"
