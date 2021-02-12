@@ -807,9 +807,9 @@ agent:
         volumes:
           - hostPathVolume:
               hostPath: "/var/run/.m2"
-              mountPath: "/var/run/.m2"
+              mountPath: "/root/.m2"
           - secretVolume:
-              mountPath: "/var/run/secret/jenkins_keys"
+              mountPath: "/root/.ssh/id_rsa"
               secretName: "jenkins-keys"
 #            volumeMounts:
 #              - mountPath: /root/.m2
@@ -869,7 +869,7 @@ agent:
               mountPath: "/var/run/docker.sock"
           - secretVolume:
               mountPath: "/home/jenkins/.docker"
-              secretName: "jenkins-docker-cfg"
+              secretName: "regcred"
         envVars:
           - containerEnvVar:
               key: "DOCKER_CONFIG"
