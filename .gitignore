@@ -29,3 +29,4 @@ override.tf.json
 # example: *tfplan*
 gcp/.terraform.lock.hcl
 datastore/.terraform.lock.hcl
+node_modules
