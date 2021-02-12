@@ -288,7 +288,7 @@ controller:
             installations:
             - name: "maven-default"
               properties:
-              - installSource:
+              - installSource: 
                   installers:
                     - maven:
                         id: "3.5.4"
