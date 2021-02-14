@@ -1,8 +1,12 @@
 {
     "tagFormat": "v${version}",
     "debug": true,
-    "dryRun": false,
-    "branches": ["master",{ "name": "terraform-modules", "prerelease": true }],
+    "branches": [
+        "master",
+        {"name": "next", "channel": "channel-${name}" }
+        {"name": "rc", "channel": "rc", "prerelease": "rc"}, // `prerelease` is built with the template `${name.replace(/^pre\\//g, "")}`
+        {"name": "beta", "channel": "beta", "prerelease": "beta"},         
+    ],
     "plugins": 
     [   "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
