@@ -1,14 +1,9 @@
-######################################################################################################### 
-####
-#### DATA CONFIG
-####
-#########################################################################################################
 data "google_client_config" "default" {}
 
 data "terraform_remote_state" "devops" {
   backend = "gcs"
   config = {
-    bucket  = "mapx-devtools-microservices-tf-state-prod"
+    bucket  = "mapx-devtools-microservices-tf-state"
     prefix  = "modules/devops.tfstate"
   }
 }
