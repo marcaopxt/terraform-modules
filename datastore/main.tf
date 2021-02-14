@@ -44,4 +44,32 @@ resource "helm_release" "pgadmin" {
 
 }
 
+data "template_file" "cassandra_release_template" {
+  template = file("${path.module}/templates/cassandra-values.tpl.yaml")
+  vars     = var.cassandra_release_config
+}
+
+resource "kubernetes_namespace" "cassandra" {
+  metadata {
+    annotations = {}
+    labels = {}
+    name = "cassandra"
+  }
+}
+resource "helm_release" "cassandra" {
+  count         = var.cassandra_enabled == false ? 1 : 0
+  name          = "cassandra"
+  namespace     = "cassandra" 
+  chart         = "cassandra"
+  repository    = "https://charts.bitnami.com/bitnami"
+  version       = "7.3.2"
+  reuse_values  = false
+  recreate_pods = true
+  force_update  = true
+
+  values        = [ data.template_file.cassandra_release_template.rendered ]
+
+}
+
+
 
