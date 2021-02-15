@@ -9,26 +9,19 @@ data "terraform_remote_state" "devops" {
 }
 
 resource "kubernetes_namespace" "spark" {
-  metadata {
-    annotations = {}
-    labels = {}
-    name = "spark"
-  }
+    count         = var.spark_enabled == false ? 0 : 1  
+    metadata {
+        annotations = {}
+        labels = {}
+        name = "spark"
+    }
 }
-resource "kubernetes_namespace" "kafka" {
-  metadata {
-    annotations = {}
-    labels = {}
-    name = "kafka"
-  }
-}
-
 data "template_file" "spark_release_template" {
-  template = file("${path.module}/templates/spark-values.tpl.yaml")
-  vars     = var.spark_release_config
+    template = file("${path.module}/templates/spark-values.tpl.yaml")
+    vars     = var.spark_release_config
 }
-
 resource "helm_release" "spark" {
+    count         = var.spark_enabled == false ? 0 : 1  
     name             = "spark"
     namespace        = "spark"
     chart            = "spark"
@@ -41,11 +34,21 @@ resource "helm_release" "spark" {
     values        = [ data.template_file.spark_release_template.rendered ]
 }
 
+
+resource "kubernetes_namespace" "kafka" {
+    count         = var.kafka_enabled == false ? 0 : 1  
+    metadata {
+        annotations = {}
+        labels = {}
+        name = "kafka"
+    }
+}
 data "template_file" "kafka_release_template" {
-  template = file("${path.module}/templates/kafka-values.tpl.yaml")
-  vars     = var.kafka_release_config
+    template = file("${path.module}/templates/kafka-values.tpl.yaml")
+    vars     = var.kafka_release_config
 }
 resource "helm_release" "kafka" {
+    count         = var.kafka_enabled == false ? 0 : 1  
     name             = "kafka"
     namespace        = "kafka"
     chart            = "kafka"
@@ -56,4 +59,21 @@ resource "helm_release" "kafka" {
     force_update     = false
     create_namespace = true
     values        = [ data.template_file.kafka_release_template.rendered ]
+}
+data "template_file" "kafdrop_release_template" {
+    template = file("${path.module}/templates/kafdrop-values.tpl.yaml")
+    vars     = var.kafdrop_release_config
+}
+resource "helm_release" "kafdrop" {
+    count            = var.kafdrop_enabled == false ? 0 : 1  
+    name             = "kafdrop"
+    namespace        = "kafka"
+    chart            = "kafdrop"
+    repository       = "git::git@github.com:/obsidiandynamics/kafdrop.git//chart"
+    version          = "3.27.0"                                                                                                                         
+    reuse_values     = false
+    recreate_pods    = false
+    force_update     = false
+    create_namespace = true
+    values        = [ data.template_file.kafdrop_release_template.rendered ]
 }
