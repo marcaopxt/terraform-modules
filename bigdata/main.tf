@@ -69,8 +69,8 @@ resource "helm_release" "kafdrop" {
     name             = "kafdrop"
     namespace        = "kafka"
     chart            = "kafdrop"
-    repository       = "git::git@github.com:/obsidiandynamics/kafdrop.git//chart"
-    version          = "3.27.0"                                                                                                                         
+    repository       = "https://raw.githubusercontent.com/marcaopxt/helm-charts/master/pkg/kafdrop"
+    version          = "3.1.8-rev4"                                                                                                              
     reuse_values     = false
     recreate_pods    = false
     force_update     = false
