@@ -1,3 +1,15 @@
+variable redis_enabled {
+  type = bool
+  default = false
+}
+variable "redis_release_config" {
+  type    = map
+  default = {
+    redis_host = "redis.redis.svc.cluster.local"      
+    redisPassword = "password"
+  }
+}
+
 variable postgresql_enabled {
   type = bool
   default = false
@@ -32,6 +44,7 @@ variable "cassandra_release_config" {
 
   }
 }
+
 variable mongodb_enabled {
   type = bool
   default = false

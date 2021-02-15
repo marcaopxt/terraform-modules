@@ -1,3 +1,30 @@
+data "template_file" "redis_release_template" {
+  template = file("${path.module}/templates/redis-values.tpl.yaml")
+  vars     = var.redis_release_config
+}
+resource "kubernetes_namespace" "redis" {
+  count         = var.redis_enabled == false ? 0 : 1
+  metadata {
+    annotations = {}
+    labels = {}
+    name = "redis"
+  }
+}
+resource "helm_release" "redis" {
+  count         = var.redis_enabled == false ? 0 : 1
+  name          = "redis"
+  namespace     = "redis" 
+  chart         = "redis"
+  repository    = "https://charts.bitnami.com/bitnami"
+  version       = "12.7.4"
+  reuse_values  = false
+  recreate_pods = true
+  force_update  = true
+
+  values        = [ data.template_file.redis_release_template.rendered ]
+
+}
+
 resource "kubernetes_namespace" "postgresql" {
   count         = var.postgresql_enabled == false ? 0 : 1
   metadata {
