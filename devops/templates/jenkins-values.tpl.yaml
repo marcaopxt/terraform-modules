@@ -376,11 +376,13 @@ controller:
                 'IaaC/devops-platform',
                 'IaaC/terraform-modules',
                 'SaaS/project-transactions-api',
+                'SaaS/project-order-publisher-api',
                 'Agents/jnpl-agents',
                 'Charts/helm-chart-jenkins'
               ]
 
               jobGitRemoteBranch = [
+                '*/master',
                 '*/master',
                 '*/master',
                 '*/master',
@@ -392,6 +394,7 @@ controller:
                 'git@github.com:marcaopxt/devops-releases.git',
                 'git@github.com:marcaopxt/terraform-modules.git',
                 'git@github.com:marcaopxt/transactions-api.git',
+                'git@github.com:marcaopxt/order-publisher-api.git',
                 'git@github.com:jenkinsci/jnlp-agents.git',
                 'git@github.com:marcaopxt/helm-charts.git'
               ]
