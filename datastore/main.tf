@@ -70,6 +70,18 @@ resource "helm_release" "cassandra" {
   values        = [ data.template_file.cassandra_release_template.rendered ]
 
 }
+
+data "template_file" "mongodb_release_template" {
+  template = file("${path.module}/templates/mongodb-values.tpl.yaml")
+  vars     = var.mongodb_release_config
+}
+resource "kubernetes_namespace" "mongodb" {
+  metadata {
+    annotations = {}
+    labels = {}
+    name = "mongodb"
+  }
+}
 resource "helm_release" "mongodb" {
   count         = var.mongodb_enabled == false ? 0 : 1
   name          = "mongodb"
