@@ -23,3 +23,14 @@ variable "cassandra_release_config" {
 
   }
 }
+variable mongodb_enabled {
+  type = bool
+  default = false
+}
+variable "mongodb_release_config" {
+  type    = map
+  default = {
+    mongodb_host = "mongodb.mongodb.svc.cluster.local"      
+    rootPassword = "password"
+  }
+}

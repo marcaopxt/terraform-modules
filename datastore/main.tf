@@ -57,7 +57,7 @@ resource "kubernetes_namespace" "cassandra" {
   }
 }
 resource "helm_release" "cassandra" {
-  count         = var.cassandra_enabled == false ? 1 : 0
+  count         = var.cassandra_enabled == false ? 0 : 1
   name          = "cassandra"
   namespace     = "cassandra" 
   chart         = "cassandra"
@@ -70,6 +70,21 @@ resource "helm_release" "cassandra" {
   values        = [ data.template_file.cassandra_release_template.rendered ]
 
 }
+resource "helm_release" "mongodb" {
+  count         = var.mongodb_enabled == false ? 0 : 1
+  name          = "mongodb"
+  namespace     = "mongodb" 
+  chart         = "mongodb"
+  repository    = "https://charts.bitnami.com/bitnami"
+  version       = "10.7.0"
+  reuse_values  = false
+  recreate_pods = true
+  force_update  = true
+
+  values        = [ data.template_file.mongodb_release_template.rendered ]
+
+}
+
 
 
 
