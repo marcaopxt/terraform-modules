@@ -365,6 +365,7 @@ controller:
 
               jobArray = [
                 'IaaC/devops-platform',
+                'IaaC/terraform-modules',
                 'SaaS/project-transactions-api',
                 'Agents/jnpl-agents',
                 'Charts/helm-chart-jenkins'
@@ -374,11 +375,13 @@ controller:
                 '*/master',
                 '*/master',
                 '*/master',
+                '*/master',
                 '*/master'
               ]
 
               jobGitRemoteArray = [
                 'git@github.com:marcaopxt/devops-releases.git',
+                'git@github.com:marcaopxt/terraform-modules.git',
                 'git@github.com:marcaopxt/transactions-api.git',
                 'git@github.com:jenkinsci/jnlp-agents.git',
                 'git@github.com:marcaopxt/helm-charts.git'
