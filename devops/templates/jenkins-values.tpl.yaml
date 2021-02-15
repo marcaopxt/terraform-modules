@@ -321,15 +321,15 @@ controller:
                     - OpenJDKInstaller:
                          openjdkPackage: "openJDK11"
 
-          sbtInstallation:
-            installations:
-              - name: sbt
-                home: "/usr/bin/sbt"
-                properties:
-                  - installSource:
-                      installers:
-                        - sbtInstaller:
-                            id: "1.2.8"
+#          sbtInstallation:
+#            installations:
+#              - name: sbt
+#                home: "/usr/bin/sbt"
+#                properties:
+#                  - installSource:
+#                      installers:
+#                        - sbtInstaller:
+#                            id: "1.2.8"
 #          unclassified:
 #            sonarglobalconfiguration:                  # mandatory
 #              buildWrapperEnabled: true
