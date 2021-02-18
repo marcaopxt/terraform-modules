@@ -36,12 +36,12 @@ variable "pgadmin_release_config" {
 variable cassandra_enabled {
   type = bool
   default = false
-}
+} 
 variable "cassandra_release_config" {
   type    = map
   default = {
-    cassandra_host = "cassandra.cassandra.svc.cluster.local"      
-
+    cassandra_host = "cassandra.cassandra.svc.cluster.local"
+    serviceType    = "NodePort"
   }
 }
 

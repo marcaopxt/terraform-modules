@@ -75,12 +75,13 @@ resource "helm_release" "pgadmin" {
 }
 
 data "template_file" "cassandra_release_template" {
+  count         = var.cassandra_enabled == false ? 0 : 1  
   template = file("${path.module}/templates/cassandra-values.tpl.yaml")
   vars     = var.cassandra_release_config
 }
 
 resource "kubernetes_namespace" "cassandra" {
-  count         = var.mongodb_enabled == false ? 0 : 1  
+  count         = var.cassandra_enabled == false ? 0 : 1  
   metadata {
     annotations = {}
     labels = {}
