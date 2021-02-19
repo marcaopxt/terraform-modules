@@ -96,10 +96,10 @@ controller:
   # `securityContextCapabilities`.  In the case of mounting an ext4 filesystem,
   # it might be desirable to use `supplementalGroups` instead of `fsGroup` in
   # the `securityContext` block: https://github.com/kubernetes/kubernetes/issues/67014#issuecomment-589915496
-  # podSecurityContextOverride:
-  #   runAsUser: 1000
-  #   runAsNonRoot: true
-  #   supplementalGroups: [1000]
+  podSecurityContextOverride:
+     runAsUser: 1000
+     runAsNonRoot: true
+     supplementalGroups: [1000]
   #   # capabilities: {}
   servicePort: 8080
   targetPort: 8080
@@ -216,7 +216,13 @@ controller:
     - docker:1.2.2
     - sbt:1.5
     - artifactory:3.2.2
-
+    - docker-java-api:3.1.5.2
+    - google-container-registry-auth:0.3
+    - dockerhub-notification:2.5.1
+    - azure-credentials:4.0.5
+    - docker-traceability:1.2
+    - docker-workflow:1.25
+    - docker-commons:1.17
 #    - pipeline-milestone-step:1.3.1    
 #    - role-strategy:2.10    
 
@@ -273,6 +279,33 @@ controller:
                         directEntry:
                           privateKey: $${GITHUB_SSH_PRIVATE_KEY}
                       description: "SSH key provided"
+                  - string:
+                      scope: GLOBAL
+                      id: sonarqube_token
+                      secret:  $${SONARQUBE_TOKEN}
+                      description: "Token Provided"
+                  - string: 
+                      scope: GLOBAL
+                      id: jenkins_jnlp_agent_docker_registry_token
+                      secret: $${DOCKER_HUB_REGISTRY_TOKEN}
+                      description: "Token Provided by Docker Hub"
+
+      unclassified: |-
+        unclassified:
+          sonarglobalconfiguration:                  
+            buildWrapperEnabled: true
+            installations:                           
+              - name: "sonarqube"                    
+                serverUrl: "http://sonarqube-sonarqube.sonarqube.svc.cluster.local:9000"
+                credentialsId: sonarqube_token       
+                serverAuthenticationToken: "sonarqube_token"
+                mojoVersion: "3.8.0.2131"
+                additionalProperties: "yes=sim"
+                additionalAnalysisProperties: "additionalAnalysisProperties"
+                triggers:
+                  skipScmCause: true
+                  skipUpstreamCause: true
+                  envVar: "envVar"
 
       tools: |-
         tool:
@@ -305,12 +338,12 @@ controller:
 
           sonarRunnerInstallation:
             installations:
-            - name: sonarqube
+            - name: sonarqube-default
               properties:
               - installSource:
                   installers:
                     - sonarRunnerInstaller:
-                        id: "3.3.0.1492"                  
+                        id: "3.3.0.1492"
 
           jdk:
             installations:
@@ -321,6 +354,30 @@ controller:
                     - OpenJDKInstaller:
                          openjdkPackage: "openJDK11"
 
+
+#          sonarRunnerInstallation:
+#              buildWrapperEnabled: true
+#              installations:                           
+#                - name: "sonarqube-default"                         
+#                  serverUrl: "http://sonarqube-sonarqube.sonarqube.svc.cluster.local:9000"
+#                  credentialsId: token-sonarqube       # id of the credentials containing sonar auth token (since 2.9 version)
+#                  #serverAuthenticationToken: "token"   # for retrocompatibility with versions < 2.9
+#                  mojoVersion: "mojoVersion"
+#                  additionalProperties: "blah=blah"
+#                  additionalAnalysisProperties: "additionalAnalysisProperties"
+#                  triggers:
+#                    skipScmCause: true
+#                    skipUpstreamCause: true
+#                    envVar: "envVar"
+##          helm:
+#            installations:
+#            - name: "helm3"
+#              properties:
+#              - installSource:
+#                  installers:
+#                    - OpenJDKInstaller:
+#                         openjdkPackage: "openJDK11"                         
+#
 #          sbtInstallation:
 #            installations:
 #              - name: sbt
@@ -345,16 +402,6 @@ controller:
 #                    skipScmCause: true
 #                    skipUpstreamCause: true
 #                    envVar: "envVar"
-
-
-##          helm:
-#            installations:
-#            - name: "helm3"
-#              properties:
-#              - installSource:
-#                  installers:
-#                    - OpenJDKInstaller:
-#                         openjdkPackage: "openJDK11"                         
 
       jobs-configuration: |-
         jobs:
@@ -720,10 +767,10 @@ agent:
   #   readOnly: false
   #   serverAddress: "192.0.2.0"
   #   serverPath: /var/lib/containers
-  # - type: PVC
-  #   claimName: mypvc
-  #   mountPath: /var/myapp/mypvc
-  #   readOnly: false
+  #- type: PVC
+  #  claimName: jenkins-workspace
+  #  mountPath: /home/jenkins/workspace
+  #  readOnly: false
   # - type: Secret
   #   defaultMode: "600"
   #   mountPath: /var/myapp/mysecret
@@ -734,20 +781,20 @@ agent:
   # Allowed types are: DynamicPVC, EmptyDir, HostPath, Nfs, PVC
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes/workspace
-  workspaceVolume: 
+  workspaceVolume:
+    type: PVC
+    claimName: "jenkins-workspace"
+    readOnly: false
   # - type: DynamicPVC
   #   configMapName: myconfigmap
   # - type: EmptyDir
   #   memory: false
-#  - type: HostPath
-    #hostPath: /var/lib/docker/local-volumes/containers
+  #  - type: HostPath
+  #    hostPath: /var/lib/docker/local-volumes/containers
   # - type: Nfs
   #   readOnly: false
   #   serverAddress: "192.0.2.0"
   #   serverPath: /var/lib/containers
-  # - type: PVC
-  #   claimName: mypvc
-  #   readOnly: false
   # Pod-wide environment, these vars are visible to any container in the agent pod
   envVars: []
   # - name: PATH
@@ -760,7 +807,7 @@ agent:
   command:
   args: "${computer_jnlpmac} ${computer_name}"
   # Side container name
-  sideContainerName: "jnlp"
+  # sideContainerName: "jnlp"
   # Doesn't allocate pseudo TTY by default
   TTYEnabled: false
   # Max number of spawned agent
@@ -797,83 +844,59 @@ agent:
   # controller.JCasC.defaultConfig: true
   # Best reference is https://<jenkins_url>/configuration-as-code/reference#Cloud-kubernetes. The example below creates a python pod template.
   podTemplates: 
-    maven: |-
-      - name: maven
-        label: jenkins-maven
-        serviceAccount: jenkins
+    build-and-publish: |-
+      - name: jenkins-agent-spring-boot
+        label: jenkins-agent-spring-boot
         serviceAccount: "default"
         idleMinutes: 15
         nodeUsageMode: "NORMAL"
         podRetention: Never
         showRawYaml: true
         slaveConnectTimeoutStr: "100"
-        yamlMergeStrategy: override
+        yamlMergeStrategy: merge
         containers:
-          - name: jenkins-maven
+          - name: maven
             image: mapx/jnlp-agent-maven:${mavenAgentTag}
             command: "/bin/sh -c"
             args: "cat"
             ttyEnabled: true
-            privileged: false
+            privileged: true
+            runAsUser: jenkins
+            runAsGroup: jenkins
             resourceRequestCpu: "400m"
             resourceRequestMemory: "512Mi"
             resourceLimitCpu: "1"
             resourceLimitMemory: "1024Mi"
-        volumes:
-          - hostPathVolume:
-              hostPath: "/var/run/.m2"
-              mountPath: "/root/.m2"
-          - secretVolume:
-              mountPath: "/root/.ssh/id_rsa"
-              secretName: "jenkins-keys"
-#            volumeMounts:
-#              - mountPath: /root/.m2
-#                name: maven-local-repo         
-
-    terraform: |-
-      - name: terraform
-        label: jenkins-terraform
-        serviceAccount: "default"
-        idleMinutes: 15
-        nodeUsageMode: "NORMAL"
-        podRetention: Never
-        showRawYaml: true
-        slaveConnectTimeoutStr: "100"
-        yamlMergeStrategy: override
-        containers:
-          - name: jenkins-terraform
-            image:  mapx/jnlp-agent-terraform:${terraformAgentTag}
-            command: "/bin/sh -c"
-            args: "cat"
-            ttyEnabled: true
-            privileged: false
-            resourceRequestCpu: "200m"
-            resourceRequestMemory: "256Mi"
-            resourceLimitCpu: "500m"
-            resourceLimitMemory: "512Mi"
-        envVars:
-          - secretEnvVar: 
-              key: GITHUB_SSH_PRIVATE_KEY
-              secretName: jenkins-keys 
-              secretKey: GITHUB_SSH_PRIVATE_KEY 
-
-    docker: |-
-      - name: docker
-        label: jenkins-docker
-        serviceAccount: "default"
-        idleMinutes: 15
-        nodeUsageMode: "NORMAL"
-        podRetention: Never
-        showRawYaml: true
-        slaveConnectTimeoutStr: "100"
-        yamlMergeStrategy: override
-        containers:
-          - name: jenkins-docker
+          - name: docker
             image: mapx/jnlp-agent-docker:${dockerAgentTag}
             command: "/bin/sh -c"
             args: "cat"
             ttyEnabled: true
             privileged: true
+            runAsUser: root
+            runAsGroup: docker
+            resourceRequestCpu: "200m"
+            resourceRequestMemory: "256Mi"
+            resourceLimitCpu: "500m"
+            resourceLimitMemory: "512Mi"
+          - name: docker-dind
+            image: odavid/jenkins-jnlp-slave:${dindAgentTag}
+            command: "/bin/sh -c"
+            args: "cat"
+            ttyEnabled: true
+            privileged: true
+            runAsUser: jenkins
+            runAsGroup: docker
+            resourceRequestCpu: "200m"
+            resourceRequestMemory: "256Mi"
+            resourceLimitCpu: "500m"
+            resourceLimitMemory: "512Mi"
+          - name: helm
+            image:  mapx/jnlp-agent-helm:${helmAgentTag}
+            command: "/bin/sh -c"
+            args: "cat"
+            ttyEnabled: true
+            privileged: false
             resourceRequestCpu: "200m"
             resourceRequestMemory: "256Mi"
             resourceLimitCpu: "500m"
@@ -885,7 +908,17 @@ agent:
           - secretVolume:
               mountPath: "/home/jenkins/.docker"
               secretName: "regcred"
+          - hostPathVolume:
+              hostPath: "/var/run/.m2"
+              mountPath: "/root/.m2"
+          - secretVolume:
+              mountPath: "/root/.ssh/id_rsa"
+              secretName: "jenkins-keys"
         envVars:
+          - secretEnvVar:
+              key: GITHUB_SSH_PRIVATE_KEY
+              secretName: jenkins-keys
+              secretKey: GITHUB_SSH_PRIVATE_KEY
           - containerEnvVar:
               key: "DOCKER_CONFIG"
               value: "/home/jenkins/.docker/"
@@ -904,37 +937,23 @@ agent:
           - containerEnvVar:
               key: "XDG_CONFIG_HOME"
               value: "/home/jenkins"
-          - containerEnvVar:
-              key: "_JAVA_OPTIONS"
-              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap\
-                \ -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5\
-                \ -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90\
-                \ -Xms10m -Xmx192m"
+
+#              
+#          - containerEnvVar:
+#              key: "_JAVA_OPTIONS"
+#              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap\
+#                \ -Dsun.zip.disableMemoryMapping=true -XX:+UseParallelGC -XX:MinHeapFreeRatio=5\
+#                \ -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90\
+#                \ -Xms10m -Xmx192m"
+
+#            volumeMounts:
+#              - mountPath: /root/.m2
+#                name: maven-local-repo         
+
+
 #            volumeMounts:
 #              - mountPath: /var/run/docker.sock
 #                name: docker-sock            
-
-    helm: |-
-     - name: helm
-       label: jenkins-helm
-       serviceAccount: "default"
-       idleMinutes: 15
-       nodeUsageMode: "NORMAL"
-       podRetention: Never
-       showRawYaml: true
-       slaveConnectTimeoutStr: "100"
-       yamlMergeStrategy: override
-       containers:
-         - name: jenkins-helm
-           image:  mapx/jnlp-agent-helm:${helmAgentTag}
-           command: "/bin/sh -c"
-           args: "cat"
-           ttyEnabled: true
-           privileged: false
-           resourceRequestCpu: "200m"
-           resourceRequestMemory: "256Mi"
-           resourceLimitCpu: "500m"
-           resourceLimitMemory: "512Mi"
   
   #  python: |
   #    - name: python
