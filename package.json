@@ -1,9 +1,9 @@
 {
     "name": "terraform-repo",
-    "private": "true",
+    "private": "false",
     "devDependencies": {
         "@semantic-release/github": "^7.2.0"
     },
     "repository": "github:marcaopxt/terraform-modules",
-    "version": "0.6.0"
+    "version": "0.6.1"
 }
