@@ -76,6 +76,66 @@ resource "kubernetes_persistent_volume_claim" "jenkins_home" {
   }
 }
 
+resource "kubernetes_persistent_volume" "jenkins_workspace" {
+  metadata {
+    name      = "jenkins-workspace"
+    annotations = {
+      "meta.helm.sh/release-name": "jenkins"
+      "meta.helm.sh/release-namespace": "jenkins"
+    }    
+    labels = {
+      "app.kubernetes.io/managed-by": "Helm"
+    }
+  }
+  spec {
+    capacity = {
+      storage = "12Gi"
+    }
+    access_modes = ["ReadWriteMany"]
+    persistent_volume_source {
+      local {
+        path = "/var/lib/docker/local-volumes/jenkins-workspace"
+      }
+    }    
+    storage_class_name = "hostpath"
+    node_affinity {
+      required {
+        node_selector_term {
+          match_expressions {
+            key = "kubernetes.io/hostname"
+            operator = "In"
+            values = ["docker-desktop"]  # must mnanually put this one in
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "jenkins_workspace" {
+  metadata {
+    name      = "jenkins-workspace"
+    namespace = "jenkins"
+    annotations = {
+      "meta.helm.sh/release-name": "jenkins"
+      "meta.helm.sh/release-namespace": "jenkins"
+    }
+    labels = {
+      "app.kubernetes.io/managed-by": "Helm"
+    }
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    resources {
+      requests = {
+        storage = "12Gi"
+      }
+    }
+    volume_name = kubernetes_persistent_volume.jenkins_workspace.metadata[0].name
+    storage_class_name = "hostpath"
+  }
+}
+
 data "template_file" "jenkins_release_template" {
   template = file("${path.module}/templates/jenkins-values.tpl.yaml")
   vars     = var.jenkins_release_config
@@ -85,8 +145,8 @@ resource "helm_release" "jenkins" {
     name          = "jenkins"
     namespace     = "jenkins" 
     chart         = "jenkins"
-    repository    = "https://raw.githubusercontent.com/marcaopxt/helm-charts/master/pkg/mapx"
-    version       = "3.1.8-rev4"
+    repository    = "https://raw.githubusercontent.com/marcaopxt/helm-charts/master/pkg/jenkins"
+    version       = "3.1.8-rev5"
     reuse_values  = false
     recreate_pods = true
     force_update  = true
