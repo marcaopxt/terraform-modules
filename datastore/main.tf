@@ -99,7 +99,7 @@ resource "helm_release" "cassandra" {
   recreate_pods = true
   force_update  = true
 
-  values        = [ data.template_file.cassandra_release_template.rendered ]
+  values        = [ data.template_file.cassandra_release_template[0].rendered ]
 
 }
 
