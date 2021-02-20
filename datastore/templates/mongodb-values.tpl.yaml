@@ -61,7 +61,7 @@ architecture: standalone
 
 ## Use StatefulSet instead of Deployment when deploying standalone
 ##
-useStatefulSet: false
+useStatefulSet: true
 
 ## MongoDB(R) Authentication parameters
 ##
@@ -77,9 +77,9 @@ auth:
   ## MongoDB(R) custom user and database
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
   ##
-  # username: username
-  # password: password
-  # database: database
+  username: username
+  password: password
+  database: database
   ## Key used for replica set authentication
   ## Ignored when mongodb.architecture=standalone
   ##
@@ -187,10 +187,15 @@ disableSystemLog: false
 ##     #keyFile: /opt/bitnami/mongodb/conf/keyfile
 ##
 configuration: ""
+#  net:
+#     port: 27017
 
 ## ConfigMap with MongoDB(R) configuration for Primary and Secondary nodes
 ## NOTE: When it's set the arbiter.configuration parameter is ignored
 ##
+     #ipv6: false
+     #bindIpAll: true
+     #bindIp: "0.0.0.0"
 # existingConfigmap:
 
 ## initdb scripts
