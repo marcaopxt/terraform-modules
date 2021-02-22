@@ -429,10 +429,19 @@ controller:
                 'Charts/helm-chart-jenkins'
               ]
 
+              jobType = [
+                "pipelineJob",
+                "pipelineJob",
+                "multibranchPipelineJob",
+                "pipelineJob",
+                "pipelineJob",
+                "pipelineJob"
+              ]
+
               jobGitRemoteBranch = [
                 '*/master',
                 '*/master',
-                '*/master',
+                '*/*',
                 '*/master',
                 '*/master',
                 '*/master'
@@ -448,10 +457,11 @@ controller:
               ]
 
               for(i = 0; i < jobArray.size(); i++)
-                pipelineJob(jobArray[i]) { 
-                  definition {
-                    cpsScm {
-                      scm {
+                if(jobType[i].equals("pipelineJob")) { 
+                  pipelineJob(jobArray[i]) { 
+                    definition {
+                      cpsScm {
+                        scm {
                           git {
                             remote {
                                 name(jobArray[i])
@@ -464,9 +474,26 @@ controller:
                             }
                           }
                         }
-                     }
-                  }   
-              }
+                      }
+                    }
+                  }
+                } else if(jobType[i].equals("multibranchPipelineJob")) {
+                  multibranchPipelineJob(jobArray[i]) { 
+                    branchSources {
+                      git {
+                        id('transactions')
+                        remote(jobGitRemoteArray[i])
+                        credentialsId('ssh_github')
+                      }
+                    }
+                    orphanedItemStrategy {
+                      discardOldItems {
+                        numToKeep(5)
+                      }
+                    }
+                  }
+                }
+
 
 
     # Ignored if securityRealm is defined in controller.JCasC.configScripts and
