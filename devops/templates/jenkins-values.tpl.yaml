@@ -225,6 +225,8 @@ controller:
     - docker-commons:1.17
     - jacoco:3.1.1
     - timestamper:1.11.8
+    - ansicolor:0.7.5
+    - copyartifact:1.46
 #    - pipeline-milestone-step:1.3.1    
 #    - role-strategy:2.10    
 
@@ -286,6 +288,12 @@ controller:
                       id: sonarqube_token
                       secret:  $${SONARQUBE_TOKEN}
                       description: "Token Provided"
+                  - usernamePassword:
+                      scope: GLOBAL
+                      id: dockerhub_registry
+                      username: $${GITHUBUSERNAME}
+                      password:  $${GITHUBPASSWORD}
+                      description: "Password Provided"
                   - string: 
                       scope: GLOBAL
                       id: jenkins_jnlp_agent_docker_registry_token
@@ -425,16 +433,31 @@ controller:
                 'IaaC/devops-platform',
                 'IaaC/terraform-modules',
                 'SaaS/project-transactions-api',
+                'SaaS/project-event-producer-api',
+                'SaaS/project-event-consumer-api',
                 'SaaS/project-order-publisher-api',
                 'Agents/jnpl-agents',
                 'Charts/helm-chart-jenkins'
+              ]
+
+              jenkinsfileLocation = [
+                'Jenkinsfile',
+                'Jenkinsfile',
+                'transactions-api/Jenkinsfile',
+                'event-producer-api/Jenkinsfile',
+                'event-consumer-api/Jenkinsfile',
+                'Jenkinsfile',
+                'Jenkinsfile',
+                'Jenkinsfile'
               ]
 
               jobType = [
                 "pipelineJob",
                 "pipelineJob",
                 "multibranchPipelineJob",
-                "pipelineJob",
+                "multibranchPipelineJob",
+                "multibranchPipelineJob",
+                "multibranchPipelineJob",
                 "pipelineJob",
                 "pipelineJob"
               ]
@@ -443,7 +466,9 @@ controller:
                 '*/master',
                 '*/master',
                 '*/*',
-                '*/master',
+                '*/*',
+                '*/*',
+                '*/*',
                 '*/master',
                 '*/master'
               ]
@@ -451,7 +476,9 @@ controller:
               jobGitRemoteArray = [
                 'git@github.com:marcaopxt/devops-releases.git',
                 'git@github.com:marcaopxt/terraform-modules.git',
-                'git@github.com:marcaopxt/transactions-api.git',
+                'git@github.com:marcaopxt/marketplace.git',
+                'git@github.com:marcaopxt/marketplace.git',
+                'git@github.com:marcaopxt/marketplace.git',
                 'git@github.com:marcaopxt/order-publisher-api.git',
                 'git@github.com:jenkinsci/jnlp-agents.git',
                 'git@github.com:marcaopxt/helm-charts.git'
@@ -480,6 +507,11 @@ controller:
                   }
                 } else if(jobType[i].equals("multibranchPipelineJob")) {
                   multibranchPipelineJob(jobArray[i]) { 
+                    factory {
+                      workflowBranchProjectFactory {
+                        scriptPath(jenkinsfileLocation[i])
+                      }
+                    }
                     branchSources {
                       git {
                         id('transactions')
@@ -880,7 +912,7 @@ agent:
         idleMinutes: 15
         nodeUsageMode: "NORMAL"
         podRetention: Never
-        showRawYaml: true
+        showRawYaml: false
         slaveConnectTimeoutStr: "100"
         yamlMergeStrategy: merge
         containers:
