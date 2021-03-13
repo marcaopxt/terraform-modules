@@ -1,15 +1,9 @@
-variable "PROJECT_NUMBER" {
-    type        = string
-    default     = ""
-    description = "GCP Project ID"
-}
-
-variable "gcp_enabled" {
+variable "azure_enabled" {
    type         = bool
    default      = false
    description  = "Use GCP GCS as backend state"
 }
-variable "gke_enabled" {
+variable "aks_enabled" {
    type         = bool
    default      = false
    description  = "Use GCP GCS as backend state"

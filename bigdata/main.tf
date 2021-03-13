@@ -1,5 +1,6 @@
 data "google_client_config" "default" {}
 
+/*
 data "terraform_remote_state" "devops" {
   backend = "gcs"
   config = {
@@ -7,7 +8,13 @@ data "terraform_remote_state" "devops" {
     prefix  = "modules/bigdata.tfstate"
   }
 }
+*/
 
+////////////////////////////////////
+////
+//// Spark
+////
+////////////////////////////////////////////
 resource "kubernetes_namespace" "spark" {
     count         = var.spark_enabled == false ? 0 : 1  
     metadata {
@@ -31,10 +38,14 @@ resource "helm_release" "spark" {
     recreate_pods    = false
     force_update     = false
     create_namespace = true
-    values        = [ data.template_file.spark_release_template.rendered ]
+    values           = [ data.template_file.spark_release_template.rendered ]
+    depends_on       = [module.kubernetes]
 }
-
-
+///////////////////////////////////////
+/////
+///// Kafka
+/////
+////////////////////////////////////
 resource "kubernetes_namespace" "kafka" {
     count         = var.kafka_enabled == false ? 0 : 1  
     metadata {
@@ -59,7 +70,13 @@ resource "helm_release" "kafka" {
     force_update     = false
     create_namespace = true
     values        = [ data.template_file.kafka_release_template.rendered ]
+    depends_on       = [module.kubernetes]
 }
+/////////////////////////////
+////
+//// Kafdrop (UI)
+//// 
+////////////////////////////////
 data "template_file" "kafdrop_release_template" {
     template = file("${path.module}/templates/kafdrop-values.tpl.yaml")
     vars     = var.kafdrop_release_config
@@ -76,4 +93,5 @@ resource "helm_release" "kafdrop" {
     force_update     = false
     create_namespace = true
     values        = [ data.template_file.kafdrop_release_template.rendered ]
+    depends_on       = [module.kubernetes]
 }

@@ -22,7 +22,7 @@ resource "helm_release" "redis" {
   force_update  = true
 
   values        = [ data.template_file.redis_release_template.rendered ]
-
+    depends_on       = [module.kubernetes]
 }
 
 resource "kubernetes_namespace" "postgresql" {
@@ -50,6 +50,7 @@ resource "helm_release" "postgresql" {
   recreate_pods = true
   force_update  = true
   values        = [ data.template_file.postgresql_release_template.rendered ]
+    depends_on       = [module.kubernetes]
 }
 
 data "template_file" "pgadmin_release_template" {
@@ -70,8 +71,7 @@ resource "helm_release" "pgadmin" {
 
   values        = [ data.template_file.pgadmin_release_template.rendered ]
   
-  depends_on     = [ helm_release.postgresql ]
-
+  depends_on     = [ helm_release.postgresql, module.kubernetes ]
 }
 
 data "template_file" "cassandra_release_template" {
@@ -100,7 +100,7 @@ resource "helm_release" "cassandra" {
   force_update  = true
 
   values        = [ data.template_file.cassandra_release_template[0].rendered ]
-
+  depends_on       = [module.kubernetes]
 }
 
 data "template_file" "mongodb_release_template" {
@@ -127,7 +127,7 @@ resource "helm_release" "mongodb" {
   force_update  = true
 
   values        = [ data.template_file.mongodb_release_template.rendered ]
-
+  depends_on       = [module.kubernetes]
 }
 
 
