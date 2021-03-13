@@ -25,8 +25,8 @@ resource "helm_release" "spark" {
     name             = "spark"
     namespace        = "spark"
     chart            = "spark"
-    repository       = "https://charts.bitnami.com/bitnami"
-    version          = "5.1.1"                                                                                                                         
+    repository       = "https://microsoft.github.io/charts/repo/"
+    version          = "1.0.4"                                                                                                                         
     reuse_values     = false
     recreate_pods    = false
     force_update     = false
