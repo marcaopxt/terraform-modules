@@ -28,7 +28,8 @@ pipeline {
                 }
             } 
             steps {
-                echo 'Linting..'
+                echo 'Validating'
+		sh 'terraform validate'
                 echo 'Planing..'
                 echo 'Collecting and Checking..'
             }
