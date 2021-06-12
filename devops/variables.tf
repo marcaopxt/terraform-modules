@@ -51,6 +51,7 @@ variable "jenkins_release_config" {
   })
   default = {
             serviceType             = "LoadBalancer"
+            servicePort             = "8080"
             prometheusEnabled       = "false"
             mavenAgentTag           = "0.0.1"
             helmAgentTag            = "0.0.1"
