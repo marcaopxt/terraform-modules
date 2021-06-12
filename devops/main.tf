@@ -151,6 +151,12 @@ resource "helm_release" "jenkins" {
     recreate_pods = true
     force_update  = true
     values        = [ data.template_file.jenkins_release_template.rendered ]
+
+    depends_on = [
+      kubernetes_namespace.jenkins,
+      kubernetes_persistent_volume_claim.jenkins_workspace,
+      kubernetes_persistent_volume_claim.jenkins_home
+    ]
   
 }
 
