@@ -1,6 +1,22 @@
 pipeline {
-    agent terraform
-
+    agent {
+        kubernetes {
+        yaml """\
+            apiVersion: v1
+            kind: Pod
+            metadata:
+            labels:
+                purpuse: terraform-builder
+            spec:
+            containers:
+            - name: terraform
+                image: hashicorp/terraform:0.14.11
+                command:
+                - cat
+                tty: true
+            """.stripIndent()
+        }
+    }    
     stages {
         stage('Check it out') {
             when {
