@@ -26,14 +26,10 @@ pipeline {
                         branch 'release'
                     }
                 }
-            }            
+            } 
             steps {
                 echo 'Linting..'
-            }
-            steps {
                 echo 'Planing..'
-            }
-            steps {
                 echo 'Collecting and Checking..'
             }
         }
@@ -43,8 +39,6 @@ pipeline {
             }            
             steps {
                 echo 'Preparing....'
-            }
-            steps {
                 echo 'Deploying....'
             }
         }
