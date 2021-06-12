@@ -2,11 +2,12 @@
 
 ## Common
 ## Datastore
-## Devops
 ## Spark
 ## Kafka
 
-## Actual Plugins
+## Devops
+
+### Actual Jenkins Plugins
     - jenkins-design-language:1.24.4
     - git-server:1.9
     - pipeline-milestone-step:1.3.2
@@ -131,3 +132,5 @@
     - async-http-client:1.9.40.0
     - dockerhub-notification:2.5.1
     - docker-custom-build-environment:1.7.3
+
+
