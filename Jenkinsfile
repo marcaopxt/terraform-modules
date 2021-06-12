@@ -10,10 +10,10 @@ pipeline {
             spec:
             containers:
             - name: terraform
-                image: hashicorp/terraform:0.14.11
-                command:
-                - cat
-                tty: true
+              image: hashicorp/terraform:0.14.11
+              command:
+              - cat
+              tty: true
             """.stripIndent()
         }
     }    
