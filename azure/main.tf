@@ -8,6 +8,7 @@ resource "azurerm_resource_group" "this" {
 }
 
 resource "azurerm_kubernetes_cluster" "akscluster" {
+  count               = var.aks_enabled ? 1 : 0
   name                = "demo"
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
