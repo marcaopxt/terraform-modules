@@ -9,7 +9,7 @@ pipeline {
                 purpuse: terraform-builder
             spec:
             containers:
-            - name: terraform
+            - name: jnlp
               image: hashicorp/terraform:0.14.11
               command:
               - cat
