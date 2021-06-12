@@ -36,6 +36,7 @@
 variable "jenkins_release_config" {
   type    = object({
                 serviceType             = string
+                servicePort             = string
                 prometheusEnabled       = string
                 mavenAgentTag           = string
                 helmAgentTag            = string
